@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: piano-api
+    env: python
+    plan: free
+    buildCommand: pip install -r requirements.txt && python manage.py collectstatic --noinput
+    startCommand: gunicorn piano.wsgi
+    envVars:
+      - key: DEBUG
+        value: "False"
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: ALLOWED_HOSTS
+        fromDatabase:
+          name: piano-db
+          property: host
+
+  - type: pserv
+    name: piano-db
+    plan: free
+    ipAddress: private
