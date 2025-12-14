@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>PianoDev — Home</title>
+		<style>
+			body { font-family: Arial, sans-serif; margin: 48px; color: #222 }
+			header { margin-bottom: 24px }
+			code { background:#f3f3f3; padding:4px 6px; border-radius:4px }
+		</style>
+	</head>
+	<body>
+		<header>
+			<h1>PianoDev</h1>
+			<p>Development server is running — this is the default <code>index.html</code>.</p>
+		</header>
+
+		<section>
+					<h2>Quick links</h2>
+					<p>Common pages and API endpoints used by this project. API routes are mounted under <code>/api/</code>.</p>
+					<ul>
+						<li><a href="/admin/">Django admin</a> — admin interface</li>
+						<li><a href="/api/">API root</a> — DRF router root (browseable)</li>
+						<li><a href="/auth/">/auth/ (dj-rest-auth)</a> — login/logout/password endpoints</li>
+						<li><a href="/auth/registration/">/auth/registration/</a> — registration endpoints</li>
+						<li><a href="/accounts/">/accounts/ (allauth)</a> — third-party auth flows</li>
+						<li><a href="/media/">/media/</a> — uploaded media files (served in DEBUG)</li>
+					</ul>
+
+					<h3>API Resources (under /api/)</h3>
+					<ul>
+						<li><a href="/api/categories/">/api/categories/</a> — product categories</li>
+						<li><a href="/api/hero-slides/">/api/hero-slides/</a> — hero slides / carousel items</li>
+						<li><a href="/api/products/">/api/products/</a> — products list/detail</li>
+						<li><a href="/api/products/1/reviews/">/api/products/&lt;id&gt;/reviews/</a> — nested product reviews (example)</li>
+						<li><a href="/api/rooms/">/api/rooms/</a> — room images/metadata</li>
+						<li><a href="/api/styles/">/api/styles/</a> — product styles</li>
+						<li><a href="/api/promo-grid-categories/">/api/promo-grid-categories/</a> — promo grid categories</li>
+						<li><a href="/api/cart/">/api/cart/</a> — cart overview</li>
+						<li><a href="/api/cart-items/">/api/cart-items/</a> — individual cart item operations</li>
+						<li><a href="/api/favorites/">/api/favorites/</a> — favorite products</li>
+						<li><a href="/api/governorates/">/api/governorates/</a> — shipping/governorate lookup</li>
+						<li><a href="/api/subcategories/">/api/subcategories/</a> — subcategory list</li>
+						<li><a href="/api/promo-banner/">/api/promo-banner/</a> — active promo banner</li>
+						<li><a href="/api/profile/">/api/profile/</a> — current user profile</li>
+						<li><a href="/api/cart/apply-coupon/">/api/cart/apply-coupon/</a> — apply/remove coupon on cart</li>
+						<li><a href="/api/checkout/">/api/checkout/</a> — create an order (checkout)</li>
+						<li><a href="/api/login/">/api/login/</a> — JWT login (token obtain)</li>
+						<li><a href="/api/register/">/api/register/</a> — user registration</li>
+					</ul>
+
+							<h3>Auth tester</h3>
+							<p>If an endpoint returns <code>405 Method Not Allowed</code> it usually expects a POST. Use this form to test login via the API (it will POST and show the JSON response below).</p>
+							<form id="auth-form">
+								<label>Email or username: <input type="text" id="auth-username" name="username" required></label>
+								<label>Password: <input type="password" id="auth-password" name="password" required></label>
+								<button type="submit">Login (POST)</button>
+							</form>
+							<pre id="auth-result" style="background:#f8f8f8;padding:10px;border-radius:6px;max-height:240px;overflow:auto"></pre>
+
+							<h3>Media preview</h3>
+							<p>Example uploaded media files (served when <code>DEBUG=True</code>).</p>
+							<ul>
+								<li><a href="/media/product_images/gemie.png" target="_blank">/media/product_images/gemie.png</a></li>
+								<li><a href="/media/product_images/Screenshot_2025-06-29_152007.png" target="_blank">/media/product_images/Screenshot_2025-06-29_152007.png</a></li>
+							</ul>
+							<div id="media-preview" style="margin-top:12px">
+								<img id="preview-img" src="/media/product_images/gemie.png" alt="example" style="max-width:360px;border:1px solid #eee;padding:6px;background:#fff" />
+							</div>
+		</section>
+
+						<script>
+							// Simple login tester: tries /api/login/ (JWT obtain) then falls back to /auth/login/.
+							async function tryLogin(url, body) {
+								try {
+									const r = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+									const txt = await r.text();
+									return { status: r.status, ok: r.ok, text: txt };
+								} catch (err) { return { status: 0, ok: false, text: err.toString() }; }
+							}
+
+							document.getElementById('auth-form').addEventListener('submit', async (ev) => {
+								ev.preventDefault();
+								const username = document.getElementById('auth-username').value;
+								const password = document.getElementById('auth-password').value;
+								const resultEl = document.getElementById('auth-result');
+								resultEl.textContent = 'Trying /api/login/ ...';
+								// Try common API login path (registered in users/urls.py as /api/login/)
+								let res = await tryLogin('/api/login/', { email: username, password });
+								if (res.status === 405 || res.status === 404) {
+									// Try a second common path (dj-rest-auth)
+									resultEl.textContent = `Trying /auth/login/ (fallback) ...`;
+									res = await tryLogin('/auth/login/', { username, password });
+								}
+								resultEl.textContent = `HTTP ${res.status}\n\n${res.text}`;
+							});
+						</script>
+
+		<footer style="margin-top:40px;color:#666">
+			<small>Generated minimal index for local dev.</small>
+		</footer>
+	</body>
+</html>
